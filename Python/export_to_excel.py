@@ -13,7 +13,7 @@ from datetime import datetime
 import argparse
 import progressbar
 
-__version__ = 1.1
+__version__ = 1.2
 
 WORKSHEET_NAME = "Worksheet"
 
@@ -183,14 +183,14 @@ def export_to_excel(data_provider, output_data, max_rows_in_file=500000, verbose
         with zipfile.ZipFile(output_data, "a", zipfile.ZIP_DEFLATED) as excel_file:
             if verbose_log: print_message("Create xlsx structure", 2)
             if verbose_log: print_message("Create styles file", 4)
-            with excel_file.open(r"xl\styles.xml", "w") as elem_file:
+            with excel_file.open(r"xl\styles.xml", "w", force_zip64=True) as elem_file:
                 elem_file.write(bytes(EXCEL_TEMPLATE_STYLES.format(
                     DATETIME_FORMAT), 'utf-8'))
             if verbose_log: print_message("Create general rels file", 4)
-            with excel_file.open(r"_rels\.rels", "w") as elem_file:
+            with excel_file.open(r"_rels\.rels", "w", force_zip64=True) as elem_file:
                 elem_file.write(bytes(EXCEL_TEMPLATE_GENERAL_RELS, 'utf-8'))
             if verbose_log: print_message("Create shared strings file", 4)
-            with excel_file.open(r"xl\sharedStrings.xml", "w") as elem_file:
+            with excel_file.open(r"xl\sharedStrings.xml", "w", force_zip64=True) as elem_file:
                 elem_file.write(bytes(EXCEL_TEMPLATE_SHARED_STRING, 'utf-8'))
             print_message("Export data...", 2)
             wb_sheets_templ_builder = ""
@@ -209,7 +209,7 @@ def export_to_excel(data_provider, output_data, max_rows_in_file=500000, verbose
                 ), 4)
                 ws_fname = r"xl\worksheets\sheet{}.xml".format(worksheet_index + 1)
                 ws_name ="{} #{}".format(WORKSHEET_NAME, worksheet_index + 1) if worksheets_count > 1 else WORKSHEET_NAME
-                with excel_file.open(ws_fname, "w") as ws_file:
+                with excel_file.open(ws_fname, "w", force_zip64=True) as ws_file:
                     start_row_in_grid = worksheet_index * max_rows_in_file
                     rows_in_current_file = min(provider.rows_count - start_row_in_grid, max_rows_in_file)
                     end_columns_range = number_to_letters(col_count)
@@ -271,14 +271,14 @@ def export_to_excel(data_provider, output_data, max_rows_in_file=500000, verbose
                 bar.update(provider.rows_count, force=True)
                 bar._finished = True
             if verbose_log: print_message("Create content file", 4)
-            with excel_file.open(r"[Content_Types].xml", "w") as elem_file:
+            with excel_file.open(r"[Content_Types].xml", "w", force_zip64=True) as elem_file:
                 elem_file.write(bytes(EXCEL_TEMPLATE_CONTENT_TYPES.format(ct_work_sheet_override_builder), 'utf-8'))
             if verbose_log: print_message("Create workbook file", 4)
-            with excel_file.open(r"xl\workbook.xml", "w") as elem_file:
+            with excel_file.open(r"xl\workbook.xml", "w", force_zip64=True) as elem_file:
                 elem_file.write(bytes(EXCEL_TEMPLATE_WORKBOOK.format(wb_sheets_templ_builder,
                     wb_sheets_templ_sheet_def_name_builder), 'utf-8'))
             if verbose_log: print_message("Create rels file", 4)
-            with excel_file.open(r"xl\_rels\workbook.xml.rels", "w") as elem_file:
+            with excel_file.open(r"xl\_rels\workbook.xml.rels", "w", force_zip64=True) as elem_file:
                 elem_file.write(bytes(EXCEL_TEMPLATE_RELS.format(rel_templ_builder), 'utf-8'))
             print_message("Complete export to excel!", 2)
 
